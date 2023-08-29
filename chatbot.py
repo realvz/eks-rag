@@ -13,7 +13,6 @@ from langchain.prompts import PromptTemplate
 from langchain.chains.question_answering import load_qa_chain
 from langchain import HuggingFacePipeline
 
-# Modularizing Text Splitter
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 def setup_text_splitter():
     return RecursiveCharacterTextSplitter(
@@ -24,7 +23,6 @@ def setup_text_splitter():
         add_start_index=False
     )
 
-# Modularizing Document Loading
 def load_documents(directory):
     pdf_documents = [os.path.join(directory, filename) for filename in os.listdir(directory)]
     langchain_documents = []
@@ -34,7 +32,6 @@ def load_documents(directory):
         langchain_documents.extend(data)
     return langchain_documents
 
-# Modularizing Text Preprocessing
 def preprocess_text(text):
     text = re.sub(r"(\w+)-\n(\w+)", r"\1\2", text)
     text = re.sub(r"(?<!\n\s)\n(?!\s\n)", " ", text.strip())
@@ -43,7 +40,6 @@ def preprocess_text(text):
     text = re.sub(r"(\\u[0-9A-Fa-f]+)", " ", text)
     return text
 
-# Modularizing Indexing
 def setup_index(docs, emb, index_name, index_path):
     db = FAISS.from_documents(docs, embedding=emb)
     pathlib.Path(index_path).mkdir(parents=True, exist_ok=True)
@@ -51,7 +47,6 @@ def setup_index(docs, emb, index_name, index_path):
     db_local = FAISS.load_local(folder_path=index_path, embeddings=emb, index_name=index_name)
     return db_local
 
-# Modularizing Pipeline and Prompt
 def setup_pipeline_and_prompt(model_id):
     quantization_config = BitsAndBytesConfig(
         load_in_4bit=True,
@@ -94,7 +89,6 @@ def setup_pipeline_and_prompt(model_id):
 
     return pipeline_obj, PROMPT
 
-# Modularizing Chatbot Initialization
 def setup_chatbot(llm, db_local, chain_type):
     qa = RetrievalQA.from_chain_type(
         llm=llm,
@@ -103,9 +97,7 @@ def setup_chatbot(llm, db_local, chain_type):
         return_source_documents=True,
         chain_type_kwargs={"prompt": PROMPT},
     )
-    #return qa
 
-# Modularizing User and Bot Message Handling
 def handle_messages(user_message, history, qa):
     response = qa({'query': user_message})
     bot_message = response['result']
@@ -113,7 +105,6 @@ def handle_messages(user_message, history, qa):
     history[-1][1] += bot_message
     return history
 
-# Main function
 def main():
     text_splitter = setup_text_splitter()
     index_name = 'user_manuals'
@@ -147,14 +138,12 @@ def main():
         chatbot = gr.Chatbot()
         msg = gr.Textbox()
         clear = gr.Button("Clear")
-        #llm_chain, llm = init_chain(model, tokenizer)
 
         def user(user_message, history):
             return "", history + [[user_message, None]]
 
         def bot(history):
             print("Question: ", history[-1][0])
-            #bot_message = chain.run(input_documents=documents,question=history[-1][0])
             response = qa({'query':history[-1][0]})
             bot_message = response['result']
             print("Response: ", bot_message)
