@@ -16,7 +16,7 @@ spec:
    spec:
      containers:
      - name: chatbot
-       image: 096198301477.dkr.ecr.us-west-2.amazonaws.com/chatbot:rag-v3a
+       image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/chatbot:rag-v3a
        command: ["python"]
        args: ["chatbot.py"]
        imagePullPolicy: IfNotPresent
